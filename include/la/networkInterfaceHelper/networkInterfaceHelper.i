@@ -7,9 +7,10 @@
 #if defined(SWIGCSHARP)
 #define %nspaceapp(x) %nspace x
 #elif defined(SWIGPYTHON)
-%feature("flatnested", "1");    // Flatten nested classes
-%rename(Unknown) None;          // Rename all "None" identifiers to "Unknown"
-%ignore hash;                   // Ignore any hash structres (not needed)
+%feature("flatnested", "1");    		// Flatten nested classes
+%feature("python:annotations", "c");	// Enable annotations for python type hints
+%rename(Unknown) None;          		// Rename all "None" identifiers to "Unknown"
+%ignore hash;                   		// Ignore any hash structres (not needed)
 %rename(__str__) operator std::string;
 %rename(__int__) operator int;
 #define %nspaceapp(x)
