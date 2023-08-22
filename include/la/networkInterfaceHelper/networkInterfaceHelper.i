@@ -4,6 +4,17 @@
 
 %module(directors="1") la_networkInterfaceHelper
 
+#if defined(SWIGCSHARP)
+#define %nspaceapp(x) %nspace x
+#elif defined(SWIGPYTHON)
+%feature("flatnested", "1");    // Flatten nested classes
+%rename(Unknown) None;          // Rename all "None" identifiers to "Unknown"
+%ignore hash;                   // Ignore any hash structres (not needed)
+%rename(__str__) operator std::string;
+%rename(__int__) operator int;
+#define %nspaceapp(x)
+#endif
+
 %include <stl.i>
 %include <std_string.i>
 %include <stdint.i>
@@ -35,7 +46,7 @@
 ////////////////////////////////////////
 // IPAddress
 ////////////////////////////////////////
-%nspace la::networkInterface::IPAddress;
+%nspaceapp(la::networkInterface::IPAddress);
 %ignore la::networkInterface::IPAddress::IPAddress(IPAddress&&); // Ignore move constructor
 %ignore la::networkInterface::IPAddress::operator bool; // Ignore bool operator (equivalent to isValid)
 %ignore la::networkInterface::IPAddress::operator value_type_v4; // Ignore value_type_v4 operator (equivalent to getIPV4)
@@ -96,12 +107,12 @@
 ////////////////////////////////////////
 // IPAddressInfo
 ////////////////////////////////////////
-%nspace la::networkInterface::IPAddressInfo;
+%nspaceapp(la::networkInterface::IPAddressInfo);
 
 ////////////////////////////////////////
 // Interface
 ////////////////////////////////////////
-%nspace la::networkInterface::Interface;
+%nspaceapp(la::networkInterface::Interface);
 // Extend the struct
 %extend la::networkInterface::Interface
 {
@@ -135,10 +146,11 @@
 ////////////////////////////////////////
 // NetworkInterfaceHelper
 ////////////////////////////////////////
-%nspace la::networkInterface::NetworkInterfaceHelper;
-%nspace la::networkInterface::NetworkInterfaceHelper::Observer;
+%nspaceapp(la::networkInterface::NetworkInterfaceHelper);
+%nspaceapp(la::networkInterface::NetworkInterfaceHelper::Observer);
 %ignore la::networkInterface::NetworkInterfaceHelper::enumerateInterfaces; // Disable this method, use Observer instead
 %feature("director") la::networkInterface::NetworkInterfaceHelper::Observer;
+%feature("director") la::networkInterface::NetworkInterfaceHelper::DefaultedObserver;
 
 #define final // Final keyword not properly parsed by SWIG when used on a class
 %include "la/networkInterfaceHelper/networkInterfaceHelper.hpp"
