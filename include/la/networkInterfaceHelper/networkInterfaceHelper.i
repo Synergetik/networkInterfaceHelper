@@ -27,6 +27,8 @@
 
 // Generated wrapper file needs to include our header file
 %{
+		#include <iomanip>
+		#include <sstream>
 		#include <la/networkInterfaceHelper/networkInterfaceHelper.hpp>
 %}
 
@@ -90,15 +92,24 @@
 #if defined(SWIGCSHARP)
 	// Provide a more native ToString() method
 	std::string ToString() const noexcept
+#elif defined(SWIGPYTHON)
+	// Provide a more native __str__() method
+	std::string __repr__() const noexcept
+#endif
 	{
 		return static_cast<std::string>(*$self);
 	}
-	// Provide a more native Equals() method
-	bool Equals(la::networkInterface::IPAddress const& other) const noexcept
+
+#if defined(SWIGCSHARP)
+	// Provide a more native ToString() method
+	std::string ToString() const noexcept
+#elif defined(SWIGPYTHON)
+	// Provide a more native __str__() method
+	std::string __repr__() const noexcept
+#endif
 	{
 		return *$self == other;
 	}
-#endif
 };
 // Enable some templates
 %template(IPAddressV4) std::array<std::uint8_t, 4>;
@@ -129,16 +140,51 @@
 #if defined(SWIGCSHARP)
 	// Provide a more native Equals() method
 	bool Equals(la::networkInterface::Interface const& other) const noexcept
+#elif defined(SWIGPYTHON)
+	// Provide a more native __eq__() method
+	bool __eq__(la::networkInterface::Interface const& other) const noexcept
+#endif
 	{
 		return $self->id == other.id && $self->description == other.description && $self->alias == other.alias && $self->macAddress == other.macAddress && $self->ipAddressInfos == other.ipAddressInfos && $self->gateways == other.gateways && $self->type == other.type && $self->isEnabled == other.isEnabled && $self->isConnected == other.isConnected && $self->isVirtual == other.isVirtual;
 	}
-#endif
 };
 
 // Enable some templates
 %template(IPAddressInfos) std::vector<la::networkInterface::IPAddressInfo>;
 %template(Gateways) std::vector<la::networkInterface::IPAddress>;
 %template(MacAddress) std::array<std::uint8_t, 6>;
+
+// Extend the struct
+%extend std::array<std::uint8_t, 6>
+{
+#if defined(SWIGCSHARP)
+	// Provide a more native ToString() method
+	std::string ToString() const noexcept
+#elif defined(SWIGPYTHON)
+	// Provide a more native __repr__() method
+	std::string __repr__() const noexcept
+#endif
+	{
+		bool first{ true };
+		std::stringstream ss;
+		ss << std::hex << std::setfill('0');
+
+		for (auto const v : *$self)
+		{
+			if (first)
+			{
+				first = false;
+			}
+			else
+			{
+				ss << ":";
+			}
+			ss << std::setw(2) << static_cast<uint32_t>(v);
+		}
+
+		return ss.str();
+	}
+};
 
 // Ignore MacAddressHash
 %ignore la::networkInterface::MacAddressHash;
