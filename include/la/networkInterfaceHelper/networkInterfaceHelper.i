@@ -6,6 +6,8 @@
 
 #if defined(SWIGCSHARP)
 #define %nspaceapp(x) %nspace x
+#define SWIG_NATIVE_TO_STRING_FUNC_NAME	ToString
+#define SWIG_NATIVE_EQUALS_FUNC_NAME	Equals
 #elif defined(SWIGPYTHON)
 %feature("flatnested", "1");    		// Flatten nested classes
 %feature("python:annotations", "c");	// Enable annotations for python type hints
@@ -14,6 +16,8 @@
 %rename(__str__) operator std::string;
 %rename(__int__) operator int;
 #define %nspaceapp(x)
+#define SWIG_NATIVE_TO_STRING_FUNC_NAME	__repr__
+#define SWIG_NATIVE_EQUALS_FUNC_NAME	__eq__
 #endif
 
 %include <stl.i>
@@ -90,27 +94,18 @@
 		{
 				return lhs | rhs;
 		}
-#if defined(SWIGCSHARP)
-	// Provide a more native ToString() method
-	std::string ToString() const noexcept
-#elif defined(SWIGPYTHON)
-	// Provide a more native __str__() method
-	std::string __repr__() const noexcept
-#endif
-	{
-		return static_cast<std::string>(*$self);
-	}
 
-#if defined(SWIGCSHARP)
-	// Provide a more native ToString() method
-	std::string ToString() const noexcept
-#elif defined(SWIGPYTHON)
-	// Provide a more native __str__() method
-	std::string __repr__() const noexcept
-#endif
-	{
-		return *$self == other;
-	}
+		// Provide a more native ToString() method
+		std::string SWIG_NATIVE_TO_STRING_FUNC_NAME() const noexcept
+		{
+			return static_cast<std::string>(*$self);
+		}
+
+		// Provide a more native Equals() method
+		bool SWIG_NATIVE_EQUALS_FUNC_NAME(la::networkInterface::IPAddress const& other) const noexcept
+		{
+			return *$self == other;
+		}
 };
 // Enable some templates
 %template(IPAddressV4) std::array<std::uint8_t, 4>;
@@ -128,26 +123,22 @@
 // Extend the struct
 %extend la::networkInterface::Interface
 {
-	// Add default constructor
-	Interface()
-	{
-		return new la::networkInterface::Interface();
-	}
-	// Add a copy-constructor
-	Interface(la::networkInterface::Interface const& other)
-	{
-		return new la::networkInterface::Interface(other);
-	}
-#if defined(SWIGCSHARP)
-	// Provide a more native Equals() method
-	bool Equals(la::networkInterface::Interface const& other) const noexcept
-#elif defined(SWIGPYTHON)
-	// Provide a more native __eq__() method
-	bool __eq__(la::networkInterface::Interface const& other) const noexcept
-#endif
-	{
-		return $self->id == other.id && $self->description == other.description && $self->alias == other.alias && $self->macAddress == other.macAddress && $self->ipAddressInfos == other.ipAddressInfos && $self->gateways == other.gateways && $self->type == other.type && $self->isEnabled == other.isEnabled && $self->isConnected == other.isConnected && $self->isVirtual == other.isVirtual;
-	}
+		// Add default constructor
+		Interface()
+		{
+			return new la::networkInterface::Interface();
+		}
+		// Add a copy-constructor
+		Interface(la::networkInterface::Interface const& other)
+		{
+			return new la::networkInterface::Interface(other);
+		}
+
+		// Provide a more native Equals() method
+		bool SWIG_NATIVE_EQUALS_FUNC_NAME(la::networkInterface::Interface const& other) const noexcept
+		{
+			return $self->id == other.id && $self->description == other.description && $self->alias == other.alias && $self->macAddress == other.macAddress && $self->ipAddressInfos == other.ipAddressInfos && $self->gateways == other.gateways && $self->type == other.type && $self->isEnabled == other.isEnabled && $self->isConnected == other.isConnected && $self->isVirtual == other.isVirtual;
+		}
 };
 
 // Enable some templates
@@ -158,33 +149,28 @@
 // Extend the struct
 %extend std::array<std::uint8_t, 6>
 {
-#if defined(SWIGCSHARP)
-	// Provide a more native ToString() method
-	std::string ToString() const noexcept
-#elif defined(SWIGPYTHON)
-	// Provide a more native __repr__() method
-	std::string __repr__() const noexcept
-#endif
-	{
-		bool first{ true };
-		std::stringstream ss;
-		ss << std::hex << std::setfill('0');
-
-		for (auto const v : *$self)
+		// Provide a more native ToString() method
+		std::string SWIG_NATIVE_TO_STRING_FUNC_NAME() const noexcept
 		{
-			if (first)
-			{
-				first = false;
-			}
-			else
-			{
-				ss << ":";
-			}
-			ss << std::setw(2) << static_cast<uint32_t>(v);
-		}
+			bool first{ true };
+			std::stringstream ss;
+			ss << std::hex << std::setfill('0');
 
-		return ss.str();
-	}
+			for (auto const v : *$self)
+			{
+				if (first)
+				{
+					first = false;
+				}
+				else
+				{
+					ss << ":";
+				}
+				ss << std::setw(2) << static_cast<uint32_t>(v);
+			}
+
+			return ss.str();
+		}
 };
 
 // Ignore MacAddressHash
