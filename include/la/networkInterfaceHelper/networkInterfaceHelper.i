@@ -8,19 +8,32 @@
   #if !defined(%nspaceapp)
     #define %nspaceapp(...) %nspace __VA_ARGS__
   #endif
+
+  %rename(ToString) operator std::string;						// Converty any operator std::string() method to C# ToStirng() 
+  %csmethodmodifiers operator std::string "public override";
+  %csmethodmodifiers ToString "public override";
+  
   #define SWIG_NATIVE_TO_STRING_FUNC_NAME   ToString
   #define SWIG_NATIVE_EQUALS_FUNC_NAME      Equals
 #elif defined(SWIGPYTHON)
-  %feature("flatnested", "1");    		// Flatten nested classes
-  %feature("python:annotations", "c");	// Enable annotations for python type hints
-  %rename(Unknown) None;          		// Rename all "None" identifiers to "Unknown"
-  %ignore hash;                   		// Ignore any hash structres (not needed)
-  %rename(__str__) operator std::string;
-  %rename(__int__) operator int;
-  #define %nspaceapp(x)
+  #if !defined(%nspaceapp)
+    #define %nspaceapp(...)
+  #endif
+
+  %feature("flatnested", "1");              // Flatten nested classes
+  %feature("python:annotations", "c");      // Enable annotations for python type hints
+  
+  %rename(Unknown) None;                    // Rename all "None" identifiers to "Unknown"
+  
+  %rename(__repr__) operator std::string;  // Converty any operator std::string() method to python __repr__
+  %rename(__int__) operator int;           // Converty any operator int() method to python __int__
+  
   #define SWIG_NATIVE_TO_STRING_FUNC_NAME   __repr__
   #define SWIG_NATIVE_EQUALS_FUNC_NAME      __eq__
 #endif
+
+%ignore hash;                             // Ignore any hash structres (not needed)
+
 
 %include <stl.i>
 %include <std_string.i>
@@ -48,8 +61,6 @@
 %}
 // Marshal all std::string as UTF8Str
 %typemap(imtype, outattributes="[return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPUTF8Str)]", inattributes="[System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPUTF8Str)] ") std::string, std::string const& "string"
-// Better debug display
-%typemap(csattributes) la::networkInterface::IPAddress "[System.Diagnostics.DebuggerDisplay(\"{toString()}\")]"
 #endif
 
 ////////////////////////////////////////
@@ -61,8 +72,6 @@
 %ignore la::networkInterface::IPAddress::operator value_type_v4; // Ignore value_type_v4 operator (equivalent to getIPV4)
 %ignore la::networkInterface::IPAddress::operator value_type_v6; // Ignore value_type_v6 operator (equivalent to getIPV6)
 %ignore la::networkInterface::IPAddress::operator value_type_packed_v4; // Ignore value_type_packed_v4 operator (equivalent to getIPV4Packed)
-%ignore la::networkInterface::IPAddress::hash; // Ignore hash (not needed)
-%rename("toString") la::networkInterface::IPAddress::operator std::string;
 %ignore operator++(IPAddress& lhs); // Redefined in %extend
 %ignore operator--(IPAddress& lhs); // Redefined in %extend
 %ignore operator&(IPAddress const& lhs, IPAddress const& rhs); // Redefined in %extend
@@ -95,12 +104,6 @@
 		static IPAddress Or(IPAddress const& lhs, IPAddress const& rhs)
 		{
 				return lhs | rhs;
-		}
-
-		// Provide a more native ToString() method
-		std::string SWIG_NATIVE_TO_STRING_FUNC_NAME() const noexcept
-		{
-			return static_cast<std::string>(*$self);
 		}
 
 		// Provide a more native Equals() method
