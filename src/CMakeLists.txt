@@ -108,53 +108,55 @@ if(BUILD_NIH_SWIG)
 	foreach(SWIG_LANG ${AVDECC_SWIG_LANGUAGES})
 		if(${SWIG_LANG} STREQUAL "python")
 			find_package(Python 3.8 REQUIRED COMPONENTS Development Development.Module)
-
 			message(STATUS "Using python ${Python_VERSION} from ${Python_RUNTIME_LIBRARY_DIRS}/ for SWIG bindings")
 		endif()
 	endforeach()
 
 	set(TARGET_PREFIX ${PROJECT_NAME})
 	set(SWIG_INTERFACE_FILE "${CU_ROOT_DIR}/include/la/networkInterfaceHelper/networkInterfaceHelper.i")
+	if(${AVDECC_SWIG_LANGUAGES} STREQUAL "python") # TODO: Extend for multiple languages
+		set_property(SOURCE ${SWIG_INTERFACE_FILE} PROPERTY COMPILE_OPTIONS -interface _${TARGET_PREFIX})
+	endif()
 	cu_setup_swig_target(VERSION 4.2 TARGET_NAME ${PROJECT_NAME}_static INTERFACE_FILE "${SWIG_INTERFACE_FILE}" LANGUAGES ${NIH_SWIG_LANGUAGES} SWIG_TARGET_PREFIX ${TARGET_PREFIX} REQUIRED INSTALL_SUPPORT_FILES INSTALL_CONFIGURATIONS Release Debug)
 
 	# Post process generated targets
 	foreach(SWIG_LANG ${NIH_SWIG_LANGUAGES})
-	set(SWIG_TARGET_NAME ${TARGET_PREFIX}-${SWIG_LANG})
+		set(SWIG_TARGET_NAME ${TARGET_PREFIX}-${SWIG_LANG})
 
-	# Add all public header files as dependency, so that wrapper files are re-generated whenever they change
-	set_property(TARGET ${SWIG_TARGET_NAME} PROPERTY SWIG_DEPENDS ${PUBLIC_HEADER_FILES})
-	# Setup common options like any other project
-	cu_setup_library_options(${SWIG_TARGET_NAME} ALIAS_NAME ${SWIG_LANG} NO_ALIAS_TARGET)
+		# Add all public header files as dependency, so that wrapper files are re-generated whenever they change
+		set_property(TARGET ${SWIG_TARGET_NAME} PROPERTY SWIG_DEPENDS ${PUBLIC_HEADER_FILES})
+		# Setup common options like any other project
+		cu_setup_library_options(${SWIG_TARGET_NAME} ALIAS_NAME ${SWIG_LANG} NO_ALIAS_TARGET)
 
-	# Target specific options
-	if(${SWIG_LANG} STREQUAL "lua")
-		target_link_libraries(${SWIG_TARGET_NAME} PRIVATE liblua)
-	elseif(${SWIG_LANG} STREQUAL "csharp")
-		# Supress generated python binding warnings
-		if(MSVC)
-			add_definitions("/wd4702")
+		# Target specific options
+		if(${SWIG_LANG} STREQUAL "lua")
+			target_link_libraries(${SWIG_TARGET_NAME} PRIVATE liblua)
+		elseif(${SWIG_LANG} STREQUAL "csharp")
+			# Supress generated csharp binding warnings
+			if(MSVC)
+				add_definitions("/wd4702")
+			endif()
+		elseif(${SWIG_LANG} STREQUAL "python")
+			set_target_properties(${SWIG_TARGET_NAME} PROPERTIES DEBUG_POSTFIX "_d")
+			set_target_properties(${SWIG_TARGET_NAME} PROPERTIES OUTPUT_NAME _${TARGET_PREFIX})
+
+			# Supress generated python binding warnings
+			if(MSVC)
+				add_definitions("/wd4100 /wd4127 /wd4456 /wd4701 /wd4702 /wd4706 /wd4244")
+			endif()
+
+			# Add python library references
+			target_link_libraries(${SWIG_TARGET_NAME} PRIVATE ${Python_LIBRARIES})
+			target_include_directories(${SWIG_TARGET_NAME} PRIVATE ${Python_INCLUDE_DIRS})
+
+			# Copy swig generated python file to output folder
+			get_property(SWIG_SUPPORT_FILES TARGET ${SWIG_TARGET_NAME} PROPERTY SWIG_SUPPORT_FILES)
+			add_custom_command(TARGET ${SWIG_TARGET_NAME}
+							COMMAND ${CMAKE_COMMAND} -E copy ${SWIG_SUPPORT_FILES} $<TARGET_FILE_DIR:${SWIG_TARGET_NAME}>)
 		endif()
-	elseif(${SWIG_LANG} STREQUAL "python")	
-		string(REPLACE "-python" "" SWIG_TARGET_OUTPUT_NAME ${SWIG_TARGET_NAME})
-		set_target_properties(${SWIG_TARGET_NAME} PROPERTIES OUTPUT_NAME _${SWIG_TARGET_OUTPUT_NAME})
 
-		# Supress generated python binding warnings
-		if(MSVC)
-			add_definitions("/wd4100 /wd4127 /wd4456 /wd4701 /wd4702 /wd4706 /wd4244")
-		endif()
-
-		# Add python library references
-		target_link_libraries(${SWIG_TARGET_NAME} PRIVATE ${Python_LIBRARIES})
-		target_include_directories(${SWIG_TARGET_NAME} PRIVATE ${Python_INCLUDE_DIRS})
-
-		# Copy swig generated python file to output folder
-		get_property(SWIG_SUPPORT_FILES TARGET ${SWIG_TARGET_NAME} PROPERTY SWIG_SUPPORT_FILES)
-		add_custom_command(TARGET ${SWIG_TARGET_NAME}
-						COMMAND ${CMAKE_COMMAND} -E copy ${SWIG_SUPPORT_FILES} $<TARGET_FILE_DIR:${SWIG_TARGET_NAME}>)
-	endif()
-
-	# Setup install (and signing)
-	cu_setup_deploy_library(${SWIG_TARGET_NAME} ${INSTALL_BINDINGS_FLAG} ${SIGN_FLAG})
+		# Setup install (and signing)
+		cu_setup_deploy_library(${SWIG_TARGET_NAME} ${INSTALL_BINDINGS_FLAG} ${SIGN_FLAG})
 
 	endforeach()
 endif()
