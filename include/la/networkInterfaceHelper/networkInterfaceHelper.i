@@ -2,7 +2,7 @@
 // Network Interface Helper SWIG file
 ////////////////////////////////////////
 
-%module(directors="1") la_networkInterfaceHelper
+%module(directors="1", threads="1") la_networkInterfaceHelper
 
 #if defined(SWIGCSHARP)
   #if !defined(%nspaceapp)
@@ -19,6 +19,8 @@
   #if !defined(%nspaceapp)
     #define %nspaceapp(...)
   #endif
+
+  %feature("nothreadallow");
 
   %feature("flatnested", "1");              // Flatten nested classes
   %feature("python:annotations", "c");      // Enable annotations for python type hints
