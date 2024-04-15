@@ -142,7 +142,7 @@ if(BUILD_NIH_SWIG)
 
 			# Supress generated python binding warnings
 			if(MSVC)
-				add_definitions("/wd4100 /wd4127 /wd4456 /wd4701 /wd4702 /wd4706 /wd4244")
+				add_definitions("/wd4100 /wd4127 /wd4456 /wd4701 /wd4702 /wd4706 /wd4244 /wd4457 /wd4996")
 			endif()
 
 			# Add python library references
