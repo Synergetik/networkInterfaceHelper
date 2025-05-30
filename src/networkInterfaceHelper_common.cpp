@@ -571,6 +571,21 @@ void NetworkInterfaceHelper::enumerateInterfaces(EnumerateInterfacesHandler cons
 	impl.enumerateInterfaces(onInterface);
 }
 
+std::vector<Interface> NetworkInterfaceHelper::getAllInterfaces() const noexcept
+{
+	// List of available interfaces
+	std::vector<la::networkInterface::Interface> interfaces;
+
+	// Enumerate available interfaces
+	la::networkInterface::NetworkInterfaceHelper::getInstance().enumerateInterfaces(
+		[&interfaces](la::networkInterface::Interface const& intfc)
+		{
+			interfaces.push_back(intfc);
+		});
+
+	return interfaces;
+}
+
 Interface NetworkInterfaceHelper::getInterfaceByName(std::string const& name) const
 {
 	auto const& impl = static_cast<NetworkInterfaceHelperImpl const&>(*this);

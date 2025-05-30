@@ -381,6 +381,8 @@ public:
 
 	/** Enumerates network interfaces. The specified handler is called for each found interface */
 	void enumerateInterfaces(EnumerateInterfacesHandler const& onInterface) const noexcept;
+	/** Retrieves all network interfaces. */
+	std::vector<Interface> getAllInterfaces() const noexcept;
 	/** Retrieve a copy of an interface from it's name. Throws std::invalid_argument if no interface exists with that name. */
 	Interface getInterfaceByName(std::string const& name) const;
 	/** Registers an observer to monitor changes in network interfaces. NetworkInterfaceObserver::onInterfaceAdded will be called before returning from the call, for all already discovered interfaces. */

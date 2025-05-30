@@ -100,6 +100,11 @@ if(BUILD_C_BINDINGS)
 	add_subdirectory(bindings/c)
 endif()
 
+# PYTHON Bindings library
+if(BUILD_NIH_PYTHON_BINDINGS)
+	add_subdirectory(bindings/python)
+endif()
+
 # SWIG Wrapper
 if(BUILD_NIH_SWIG)
 	include(${CU_BASE_DIR}/helpers/SetupSwig.cmake REQUIRED)
