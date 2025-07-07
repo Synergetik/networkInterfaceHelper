@@ -131,7 +131,7 @@ void bindIPAddress(py::module_& m)
 	using PackedV6 = IP::value_type_packed_v6;
 
 	// Bind IPAddress::Type enum
-	py::enum_<IP::Type>(m, "IPType", "IP address type").value("Unknown", IP::Type::None).value("V4", IP::Type::V4).value("V6", IP::Type::V6);
+	py::enum_<IP::Type>(m, "IPType", "IP address type").value("Unspecified", IP::Type::None).value("V4", IP::Type::V4).value("V6", IP::Type::V6);
 
 	// Bind IPAddress class
 	py::class_<IP>(m, "IPAddress")
@@ -230,7 +230,7 @@ void bindInterface(py::module_& m)
 	using Interface = la::networkInterface::Interface;
 
 	// Bind Interface::Type enum
-	py::enum_<Interface::Type>(m, "InterfaceType", "Enumeration of network interface types.").value("Unknown", Interface::Type::None, "Placeholder value. Should never occur in real interfaces.").value("Loopback", Interface::Type::Loopback, "Loopback interface (127.0.0.1, ::1).").value("Ethernet", Interface::Type::Ethernet, "Wired Ethernet interface.").value("WiFi", Interface::Type::WiFi, "Wireless 802.11 WiFi interface.").value("AWDL", Interface::Type::AWDL, "Apple Wireless Direct Link interface.");
+	py::enum_<Interface::Type>(m, "InterfaceType", "Enumeration of network interface types.").value("Unspecified", Interface::Type::None, "Placeholder value. Should never occur in real interfaces.").value("Loopback", Interface::Type::Loopback, "Loopback interface (127.0.0.1, ::1).").value("Ethernet", Interface::Type::Ethernet, "Wired Ethernet interface.").value("WiFi", Interface::Type::WiFi, "Wireless 802.11 WiFi interface.").value("AWDL", Interface::Type::AWDL, "Apple Wireless Direct Link interface.");
 
 	// Bind Interface struct
 	py::class_<Interface>(m, "Interface", "Represents a network interface and its associated metadata.")
