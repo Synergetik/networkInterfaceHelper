@@ -18,6 +18,7 @@ set(LA_NIH_VERSION 1.2.8)
 option(BUILD_NIH_EXAMPLES "Build examples." FALSE)
 option(BUILD_NIH_TESTS "Build unit tests." FALSE)
 option(BUILD_C_BINDINGS "Build C Bindings." FALSE)
+option(BUILD_NIH_PYTHON_BINDINGS "Build Python bindings." FALSE)
 option(BUILD_NIH_SWIG "Build SWIG Wrapper." FALSE)
 # Install options
 option(INSTALL_NIH_EXAMPLES "Install examples." FALSE)
@@ -32,6 +33,11 @@ option(ENABLE_CODE_SIGNING "Enable binaries signing." FALSE)
 ############ Override from command line "CMake -D<PARAM>=<VALUE>"
 
 # Configuration options
+if(BUILD_NIH_PYTHON_BINDINGS)
+	set(BUILD_NIH_PYTHON_BINDINGS_VERSION "3.11" CACHE STRING "Specify the Python version to build bindings against." FORCE)
+	set(BUILD_NIH_PYTHON_BINDINGS_PYBIND_TAG "v2.13.6" CACHE STRING "Specify the pybind11 tag or commit hash to fetch and use." FORCE)
+endif()
+
 if(NOT NIH_SWIG_LANGUAGES)
 	set(NIH_SWIG_LANGUAGES "csharp" CACHE STRING "Set the languages to compile as SWIG wrappers." FORCE)
 endif()

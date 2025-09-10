@@ -1,6 +1,6 @@
 # Python Bindings CMake file
 
-find_package(Python 3.11 EXACT COMPONENTS Interpreter Development REQUIRED)
+find_package(Python ${BUILD_NIH_PYTHON_BINDINGS_VERSION} EXACT COMPONENTS Interpreter Development REQUIRED)
 
 set(PYTHON_PROJECT_TARGET ${PROJECT_NAME}_python)
 set(PYTHON_OUTPUT ${PROJECT_NAME})
@@ -12,7 +12,7 @@ include(FetchContent)
 FetchContent_Declare(
   pybind11
   GIT_REPOSITORY https://github.com/pybind/pybind11.git
-  GIT_TAG        v2.13.6
+  GIT_TAG        ${BUILD_NIH_PYTHON_BINDINGS_PYBIND_TAG}
 )
 FetchContent_MakeAvailable(pybind11)
 
