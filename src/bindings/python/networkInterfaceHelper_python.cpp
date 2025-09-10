@@ -101,9 +101,9 @@ PYBIND11_MODULE(la_networkInterfaceHelper, m)
 void bindMacAddress(py::module_& m)
 {
 	// Bind MacAddress
-	py::class_<MacAddress>(m, "MacAddress")
-		.def(py::init<>())
-		.def(py::init<const std::array<std::uint8_t, 6>&>(), py::arg("mac_bytes"), "Constructs a MacAddress from a string like [00, 11, 22, 33, 44, 55]")
+	py::class_<MacAddress>(m, "MacAddress", "Represents a MAC address.")
+		.def(py::init<>(), "Constructs an empty MacAddress.")
+		.def(py::init<const std::array<std::uint8_t, 6>&>(), py::arg("mac_bytes"), "Constructs a MacAddress from a bytes array or list like [00, 11, 22, 33, 44, 55]")
 		.def(py::init<const std::string&>(), py::arg("mac_string"), "Constructs a MacAddress from a string like '00:11:22:33:44:55'")
 		.def_property_readonly("isValid", &MacAddress::isValid, "Returns True if IP is valid.")
 		.def("__repr__", &MacAddress::repr, "String representation of MacAddress.")
@@ -113,8 +113,8 @@ void bindMacAddress(py::module_& m)
 				if (i >= mac.data().size())
 					throw py::index_error();
 				return mac.data()[i];
-			})
-		.def("__len__", [](const MacAddress&) { return MacAddress::size; });
+			}, py::arg("index"), "Get byte at index (0-5).")
+		.def("__len__", [](const MacAddress&) { return MacAddress::size; }, "Returns the size of the MAC address (always 6).");
 }
 
 /*-------------------------------------------------------------------------------------------------------------------*/
@@ -134,8 +134,8 @@ void bindIPAddress(py::module_& m)
 	py::enum_<IP::Type>(m, "IPType", "IP address type").value("Unspecified", IP::Type::None).value("V4", IP::Type::V4).value("V6", IP::Type::V6);
 
 	// Bind IPAddress class
-	py::class_<IP>(m, "IPAddress")
-		.def(py::init<>())
+	py::class_<IP>(m, "IPAddress", "Represents an IP address.")
+		.def(py::init<>(), "Creates an empty IPAddress object.")
 		.def(py::init<V4>(), "Construct from IPv4 byte array.")
 		.def(py::init<V6>(), "Construct from IPv6 word array.")
 		.def(py::init<PackedV4>(), "Construct from packed IPv4.")
@@ -335,7 +335,7 @@ void bindNetworkInterfaceHelper(py::module_& m)
 				py::gil_scoped_release release;
 				self.enumerateInterfaces([&handler](const la::networkInterface::Interface& iface) { handler(iface); });
 			},
-			py::arg("handler"), "Calls the handler for each detected network interface.")
+			py::arg("handler"), "Enumerate and call the handler for each detected network interface.")
 		.def("getAllInterfaces", with_released_gil(&NetworkInterfaceHelper::getAllInterfaces), "Returns a list of all current network interfaces.")
 		.def("getInterfaceByName", with_released_gil(&NetworkInterfaceHelper::getInterfaceByName), py::arg("name"), "Returns the interface with the specified name.")
 		.def(
