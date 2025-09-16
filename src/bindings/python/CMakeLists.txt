@@ -62,9 +62,14 @@ set_target_properties(${PYTHON_PROJECT_TARGET} PROPERTIES OUTPUT_NAME ${PYTHON_O
 target_link_libraries(${PYTHON_PROJECT_TARGET} PRIVATE ${PYTHON_OUTPUT}_static)
 
 # Add custom command to generate stubs
-add_custom_command(
-    TARGET ${PYTHON_PROJECT_TARGET} POST_BUILD
-    COMMAND ${Python_EXECUTABLE} -m pybind11_stubgen ${PYTHON_OUTPUT} --output-dir ${CMAKE_CURRENT_BINARY_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Generating Python stubs with pybind11-stubgen"
+add_custom_target(${PYTHON_PROJECT_TARGET}_with_stubs
+  COMMAND ${CMAKE_COMMAND} -E env
+          PYTHONPATH=$<TARGET_FILE_DIR:${PYTHON_PROJECT_TARGET}>
+          "${Python_EXECUTABLE}" -m pybind11_stubgen
+          "${PYTHON_OUTPUT}"
+          --output-dir $<TARGET_FILE_DIR:${PYTHON_PROJECT_TARGET}>
+  WORKING_DIRECTORY $<TARGET_FILE_DIR:${PYTHON_PROJECT_TARGET}>
+  DEPENDS ${PYTHON_PROJECT_TARGET}
+  COMMENT "NIH: Generating Python stubs with pybind11-stubgen"
+  VERBATIM
 )
