@@ -1,6 +1,26 @@
 # Python Bindings CMake file
 
+# Find python installation and generate virtual environment
+set(PY_VENV_DIR "${CMAKE_BINARY_DIR}/.pyenv")
+
+find_package(Python ${BUILD_NIH_PYTHON_BINDINGS_VERSION} EXACT COMPONENTS Interpreter Development REQUIRED QUIET)
+if(NOT EXISTS "${PY_VENV_DIR}")
+  execute_process(
+    COMMAND "${Python_EXECUTABLE}" -m venv "${PY_VENV_DIR}"
+    COMMAND_ERROR_IS_FATAL ANY
+  )
+endif()
+set (ENV{VIRTUAL_ENV} "${PY_VENV_DIR}")
+
+# Select virtual environment and install pybind11 stubgen
+set(Python_FIND_VIRTUALENV ONLY)
+unset(Python_EXECUTABLE)
 find_package(Python ${BUILD_NIH_PYTHON_BINDINGS_VERSION} EXACT COMPONENTS Interpreter Development REQUIRED)
+
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" -m pip install --disable-pip-version-check -q --upgrade "pybind11-stubgen~=2.5.0"
+  COMMAND_ERROR_IS_FATAL ANY
+)
 
 set(PYTHON_PROJECT_TARGET ${PROJECT_NAME}_python)
 set(PYTHON_OUTPUT ${PROJECT_NAME})
@@ -8,6 +28,7 @@ set(PYBIND11_FINDPYTHON TRUE)
 set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
 message(STATUS "NIH: Using python library from ${Python_LIBRARIES}")
 
+# Inject pybind11 dependency
 include(FetchContent)
 FetchContent_Declare(
   pybind11
